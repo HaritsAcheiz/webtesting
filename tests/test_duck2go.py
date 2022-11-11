@@ -10,6 +10,7 @@ from selenium.webdriver.common.keys import Keys
 @pytest.fixture
 def browser():
     # initialize geckodriver
+
     driver = Firefox()
 
     # Wait implicitly for elements to be ready before attempting interactions
@@ -30,11 +31,20 @@ def test_duck2go_search(browser):
     browser.get(url)
 
     # Locate search input element
-    # In the DOM, it has 'input' element with 'gLFyf.gsfi' css selector
-    search_input = browser.find_element(By.CSS_SELECTOR, 'input.gLFyf.gsfi')
+    # In the DOM, it has input.js-search-input.search__input--adv as css selector
+    search_input = browser.find_element(By.CSS_SELECTOR, 'input.js-search-input.search__input--adv')
 
     # Send a search phrase and hit RETURN key
     search_input.send_keys(phrase + Keys.RETURN)
 
     # Verify that result appear on the result page
-    link_divs = browser.find_elements(By.TAG_NAME, )
+    link_divs = browser.find_elements(By.CSS_SELECTOR, 'div.results.js-results > div')
+    assert len(link_divs) > 0
+
+    # Verify that at least one search result contains the search phrase
+    phrase_result = browser.find_elements(By.XPATH, f"//div[@id='links']//*[contains(text(), '{phrase}')]")
+    assert len(phrase_result) > 0
+
+    # Verify that the search phrase is the same
+    search_input = browser.find_element(By.CSS_SELECTOR, 'input.search__input--adv.js-search-input')
+    assert search_input.get_attribute('value') == phrase
